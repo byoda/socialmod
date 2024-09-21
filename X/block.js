@@ -1,7 +1,62 @@
-console.log("This is my popup!")
 
-const publicToken = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
+const user_id = '245963716'
+// const endpointURL = `https://api.x.com/2/users/${user_id}/blocking`;
+const block_endpointURL = 'https://x.com/i/api/1.1/blocks/create.json';
+const unblock_endpointURL = 'https://api.x.com/1.1/blocks/destroy.json';
+// const block_endpointURL = 'https://api.x.com/i/api/1.1/blocks/create.json';
+// const unblock_endpointURL = 'https://api.x.com/i/api/1.1/blocks/destroy.json';
+const publicToken = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
+const csrfToken = 'd6330d41f0cc181504998f8b3285c43ef1619ba5e943949aa063837ff7a6c352907bd18e9d7a84c21e7a8b3796edfa321c17d4e6de2269f77c9bafdd92d447fcd797e36d04464e7e663fc585c81b8be0'
+window.onload = async () => {
+    console.log('Page loaded!');
+    // let selector = '#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > main > div > div'
+    // elem = document.querySelector('selector');
+    // console.log('Elem: ' + elem)
+
+    var manifest = chrome.runtime.getManifest();
+    let auth_header = 'Bearer ' + manifest.auth_header;
+    console.log('Auth Header: ' + auth_header);
+    const formData = new FormData();
+    formData.append('user_id', '245963716');
+    try {
+        console.log('URL:' + block_endpointURL);
+        const response = await fetch(
+            block_endpointURL, // + '?user_id=245963716',
+            {
+                method: 'POST',
+                headers: {
+                    // ':authority': 'x.com',
+                    // ':method': 'POST',
+                    // ':scheme': 'https',
+                    // 'Origin': 'https://x.com',
+                    'authorization': publicToken,
+                    'X-Csrf-Token': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Twitter-Active-User': 'yes',
+                    'X-Twitter-Client-Language': 'en',
+                    'X-Twitter-Auth-Type': 'OAuth2Session',
+                    'X-Client-Transaction-Id': 'KV4OduB1PqQNoxbExJyKFtDSytBfTlHocq8hsUUkVw8XZyCSL9nSW7gFREuEoAmQPpqDtyu9M+SmxHEPnFnviUAGC9qsKg'
+                },
+                credentials: 'include',
+                // Set the FormData instance as the request body
+                // body: formData
+                body: 'user_id=245963716'
+            }
+        );
+        if (response.status === 200) {
+            let data = await response.json();
+            console.log(data);
+        } else if (response.status === 410) {
+            console.log('User already blocked');
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
 function getCsrf() {
+    console.log("Getting CSRF!")
     let csrf = document.cookie.match(/(?:^|;\s*)ct0=([0-9a-f]+)\s*(?:;|$)/);
     return csrf ? csrf[1] : "";
 }
@@ -19,6 +74,8 @@ function debugLog(...args) {
 
 // extract full text and url entities from "note_tweet"
 function parseNoteTweet(result) {
+    console.log("Parsing Note Tweet!")
+
     let text, entities;
     if(result.note_tweet.note_tweet_results.result) {
         text = result.note_tweet.note_tweet_results.result.text;
@@ -36,7 +93,7 @@ function parseNoteTweet(result) {
 
 // transform ugly useless twitter api reply to usable legacy tweet
 function parseTweet(res) {
-    console.log('Parsing a tweet')
+    console.log('Parsing a Tweet')
     if(typeof res !== "object") return;
     if(res.limitedActionResults) {
         let limitation = res.limitedActionResults.limited_actions.find(l => l.action === "Reply");
@@ -224,492 +281,11 @@ function parseTweet(res) {
 
 
 const API = {
-    account: {
-        verifyCredentials: () => {
-            return new Promise((resolve, reject) => {
-                fetch(`https://api.${location.hostname}/1.1/account/verify_credentials.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session"
-                    },
-                    credentials: "include"
-                }).then(response => response.json()).then(data => {
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-    },
-    user: {
-        get: (val, byId = true) => {
-            return new Promise((resolve, reject) => {
-                fetch(`https://api.${location.hostname}/1.1/users/show.json?${byId ? `user_id=${val}` : `screen_name=${val}`}`, {
-                    headers: {
-                        "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAAG5LOQEAAAAAbEKsIYYIhrfOQqm4H8u7xcahRkU%3Dz98HKmzbeXdKqBfUDmElcqYl0cmmKY9KdS2UoNIz3Phapgsowi",
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "x-twitter-client-language": window.LANGUAGE ? window.LANGUAGE : navigator.language ? navigator.language : "en"
-                    },
-                    credentials: "include"
-                }).then(i => {
-                    if(i.status === 401) {
-                        setTimeout(() => {
-                            location.href = `/i/flow/login?newtwitter=true`;
-                        }, 50);
-                    }
-                    return i.json();
-                }).then(data => {
-                    debugLog('user.get', {val, byId, data});
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        getV2: name => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/graphql/sLVLhk0bGj3MVFEKTdax1w/UserByScreenName?variables=%7B%22screen_name%22%3A%22${name}%22%2C%22withSafetyModeUserFields%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%7D&features=${encodeURIComponent(JSON.stringify({"blue_business_profile_image_shape_enabled":true,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"responsive_web_graphql_timeline_navigation_enabled":true}))}`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/json",
-                        "x-twitter-client-language": LANGUAGE ? LANGUAGE : navigator.language ? navigator.language : "en"
-                    },
-                    credentials: "include"
-                }).then(i => i.json()).then(data => {
-                    debugLog('user.getV2', 'start', {name, data});
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    if(data.data.user.result.unavailable_message) {
-                        return reject(data.data.user.result.unavailable_message.text);
-                    }
-
-                    let result = data.data.user.result;
-                    result.legacy.id_str = result.rest_id;
-                    if(result.legacy_extended_profile.birthdate) {
-                        result.legacy.birthdate = result.legacy_extended_profile.birthdate;
-                    }
-                    if(result.professional) {
-                        result.legacy.professional = result.professional;
-                    }
-                    if(result.affiliates_highlighted_label && result.affiliates_highlighted_label.label) {
-                        result.legacy.affiliates_highlighted_label = result.affiliates_highlighted_label.label;
-                    }
-                    if(result.is_blue_verified && !result.legacy.verified_type) {
-                        result.legacy.verified_type = "Blue";
-                    }
-
-                    debugLog('user.getV2', 'end', result.legacy);
-                    resolve(result.legacy);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        follow: screen_name => {
-            return new Promise((resolve, reject) => {
-                fetch(`https://api.${location.hostname}/1.1/friendships/create.json`, {
-                    method: 'POST',
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
-                    },
-                    credentials: "include",
-                    body: `screen_name=${screen_name}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        unfollow: screen_name => {
-            return new Promise((resolve, reject) => {
-                fetch(`https://api.${location.hostname}/1.1/friendships/destroy.json`, {
-                    method: 'POST',
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
-                    },
-                    credentials: "include",
-                    body: `screen_name=${screen_name}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        receiveNotifications: (id, receive = false) => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/friendships/update.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&skip_status=1&cursor=-1&id=${id}&device=${receive}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        block: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/blocks/create.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `user_id=${id}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        unblock: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/blocks/destroy.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `user_id=${id}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        mute: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/mutes/users/create.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `user_id=${id}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        unmute: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/mutes/users/destroy.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `user_id=${id}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        removeFollower: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/graphql/QpNfg0kpPRfjROQ_9eOLXA/RemoveFollower`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/json"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: JSON.stringify({"variables":{"target_user_id":id},"queryId":"QpNfg0kpPRfjROQ_9eOLXA"})
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        lookup: ids => {
-            return new Promise((resolve, reject) => {
-                fetch(`https://api.${location.hostname}/1.1/users/lookup.json?user_id=${ids.join(",")}`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
-                    },
-                    credentials: "include"
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        getFollowersYouFollow: (id, cursor) => {
-            return new Promise((resolve, reject) => {
-                let obj = {
-                    "userId": id,
-                    "count": 50,
-                    "includePromotedContent": false
-                };
-                if(cursor) obj.cursor = cursor;
-                fetch(`/i/api/graphql/m8AXvuS9H0aAI09J3ISOrw/FollowersYouKnow?variables=${encodeURIComponent(JSON.stringify(obj))}&features=${encodeURIComponent(JSON.stringify({"rweb_lists_timeline_redesign_enabled":false,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"creator_subscriptions_tweet_preview_api_enabled":true,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"tweetypie_unmention_optimization_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":false,"tweet_awards_web_tipping_enabled":false,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"responsive_web_media_download_video_enabled":false,"responsive_web_enhance_cards_enabled":false}))}`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/json"
-                    },
-                    credentials: "include"
-                }).then(i => i.json()).then(data => {
-                    debugLog('user.getFollowersYouFollow', 'start', {id, cursor, data});
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    let list = data.data.user.result.timeline.timeline.instructions.find(i => i.type === 'TimelineAddEntries').entries;
-                    const out = {
-                        list: list.filter(e => e.entryId.startsWith('user-')).map(e => {
-                            let user = e.content.itemContent.user_results.result;
-                            user.legacy.id_str = user.rest_id;
-                            if(user.is_blue_verified && !user.legacy.verified_type) {
-                                user.legacy.verified = true;
-                                user.legacy.verified_type = "Blue";
-                            }
-                            return user.legacy;
-                        }),
-                        cursor: list.find(e => e.entryId.startsWith('cursor-bottom-')).content.value
-                    };
-                    debugLog('user.getFollowersYouFollow', 'end', out);
-                    resolve(out);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        switchRetweetsVisibility: (user_id, see) => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/friendships/update.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `id=${user_id}&retweets=${see}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        getFollowRequests: (cursor = -1) => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/friendships/incoming.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&skip_status=1&cursor=${cursor}&stringify_ids=true&count=100`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session"
-                    },
-                    credentials: "include"
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        acceptFollowRequest: user_id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/friendships/accept.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `user_id=${user_id}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        declineFollowRequest: user_id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/friendships/deny.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `user_id=${user_id}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-    },
     tweet: {
-        post: data => { // deprecated
-            return new Promise((resolve, reject) => {
-                fetch(`https://api.${location.hostname}/1.1/statuses/update.json`, {
-                    method: 'POST',
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
-                    },
-                    body: new URLSearchParams(data).toString(),
-                    credentials: "include"
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        /*
-            text | tweet_text | status - tweet text
-            media | media_ids - media ids
-            card_uri - card uri
-            sensitive - sensitive media
-            in_reply_to_status_id | in_reply_to_tweet_id - reply to tweet id
-            exclude_reply_user_ids - exclude mentions
-            attachment_url - quote tweet url
-            circle - circle id
-            conversation_control - conversation control (follows | mentions)
-        */
         postV2: tweet => {
             return new Promise((resolve, reject) => {
+                console.log("Tweet v2 API!")
+
                 let text;
                 if(tweet.text) {
                     text = tweet.text;
@@ -807,121 +383,10 @@ const API = {
                 });
             });
         },
-        favorite: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/graphql/lI07N6Otwv1PhnEgXILM7A/FavoriteTweet`, {
-                    method: 'POST',
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/json; charset=utf-8"
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({"variables":{"tweet_id":id},"queryId":"lI07N6Otwv1PhnEgXILM7A"})
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        unfavorite: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/graphql/ZYKSe-w7KEslx3JhSIk5LA/UnfavoriteTweet`, {
-                    method: 'POST',
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/json; charset=utf-8"
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({"variables":{"tweet_id":id},"queryId":"ZYKSe-w7KEslx3JhSIk5LA"})
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        retweet: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/graphql/ojPdsZsimiJrUGLR1sjUtA/CreateRetweet`, {
-                    method: 'POST',
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/json; charset=utf-8"
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({"variables":{"tweet_id":id,"dark_request":false},"queryId":"ojPdsZsimiJrUGLR1sjUtA"})
-                }).then(i => i.json()).then(data => {
-                    debugLog('tweet.retweet', id, data);
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        unretweet: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/graphql/iQtK4dl5hBmXewYZuEOKVw/DeleteRetweet`, {
-                    method: 'POST',
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/json; charset=utf-8"
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({"variables":{"source_tweet_id":id,"dark_request":false},"queryId":"iQtK4dl5hBmXewYZuEOKVw"})
-                }).then(i => i.json()).then(data => {
-                    debugLog('tweet.unretweet', id, data);
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        delete: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/graphql/VaenaVgh5q5ih7kvyVjgtg/DeleteTweet`, {
-                    method: 'POST',
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/json; charset=utf-8"
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({"variables":{"tweet_id":id,"dark_request":false},"queryId":"VaenaVgh5q5ih7kvyVjgtg"})
-                }).then(i => i.json()).then(data => {
-                    debugLog('tweet.delete', id, data);
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
         get: id => { // deprecated
             return new Promise((resolve, reject) => {
+                console.log("Get API!")
+
                 fetch(`https://api.${location.hostname}/1.1/statuses/show.json?id=${id}&include_my_retweet=1&cards_platform=Web13&include_entities=1&include_user_entities=1&include_cards=1&send_error_codes=1&tweet_mode=extended&include_ext_alt_text=true&include_reply_count=true&ext=views%2CmediaStats%2CverifiedType%2CisBlueVerified`, {
                     headers: {
                         "authorization": publicToken,
@@ -940,108 +405,10 @@ const API = {
                 });
             });
         },
-        vote: (api, tweet_id, card_uri, card_name, selected_choice) => {
-            return new Promise((resolve, reject) => {
-                fetch(`https://caps.${location.hostname}/v2/capi/${api.split('//')[1]}`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `twitter%3Astring%3Acard_uri=${encodeURIComponent(card_uri)}&twitter%3Along%3Aoriginal_tweet_id=${tweet_id}&twitter%3Astring%3Aresponse_card_name=${card_name}&twitter%3Astring%3Acards_platform=Web-12&twitter%3Astring%3Aselected_choice=${selected_choice}`
-                }).then(response => response.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            })
-        },
-        createCard: card_data => {
-            return new Promise((resolve, reject) => {
-                fetch(`https://caps.${location.hostname}/v2/cards/create.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `card_data=${encodeURIComponent(JSON.stringify(card_data))}`
-                }).then(response => response.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            })
-        },
-        mute: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/mutes/conversations/create.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `tweet_id=${id}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        unmute: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/mutes/conversations/destroy.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `tweet_id=${id}`
-                }).then(i => i.json()).then(data => {
-                    if (data.errors && data.errors[0].code === 32) {
-                        return reject("Not logged in");
-                    }
-                    if (data.errors && data.errors[0]) {
-                        return reject(data.errors[0].message);
-                    }
-                    resolve(data);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
         lookup: ids => {
             return new Promise((resolve, reject) => {
+                console.log("Lookup API!")
+
                 fetch(`https://api.${location.hostname}/1.1/statuses/lookup.json?id=${ids.join(',')}&include_entities=true&include_ext_alt_text=true&include_card_uri=true&tweet_mode=extended&include_reply_count=true&ext=views%2CmediaStats`, {
                     headers: {
                         "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAAFQODgEAAAAAVHTp76lzh3rFzcHbmHVvQxYYpTw%3DckAlMINMjmCwxUcaXbAN4XqJVdgMJaHqNOFgPMK0zN1qLqLQCF",
@@ -1063,46 +430,9 @@ const API = {
                 });
             });
         },
-        pin: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/account/pin_tweet.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `id=${id}`
-                }).then(i => i.text()).then(data => {
-                    resolve(true);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
-        unpin: id => {
-            return new Promise((resolve, reject) => {
-                fetch(`/i/api/1.1/account/unpin_tweet.json`, {
-                    headers: {
-                        "authorization": publicToken,
-                        "x-csrf-token": getCsrf(),
-                        "x-twitter-auth-type": "OAuth2Session",
-                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
-                    },
-                    credentials: "include",
-                    method: 'post',
-                    body: `id=${id}`
-                }).then(i => i.text()).then(data => {
-                    resolve(true);
-                }).catch(e => {
-                    reject(e);
-                });
-            });
-        },
         moderate: id => {
             return new Promise((resolve, reject) => {
+                console.log("Moderate API!")
                 fetch(`/i/api/graphql/pjFnHGVqCjTcZol0xcBJjw/ModerateTweet`, {
                     method: 'POST',
                     headers: {
@@ -1126,6 +456,7 @@ const API = {
         },
         unmoderate: id => {
             return new Promise((resolve, reject) => {
+                console.log("Unmoderate API!")
                 fetch(`/i/api/graphql/pVSyu6PA57TLvIE4nN2tsA/UnmoderateTweet`, {
                     method: 'POST',
                     headers: {
@@ -1149,6 +480,8 @@ const API = {
         },
         getModeratedReplies: (id, cursor) => {
             return new Promise((resolve, reject) => {
+                console.log("Get Moderated Replies API!")
+
                 let variables = {"rootTweetId":id,"count":20,"includePromotedContent":false};
                 if(cursor) variables.cursor = cursor;
                 fetch(`/i/api/graphql/SiKS1_3937rb72ytFnDHmA/ModeratedTimeline?variables=${encodeURIComponent(JSON.stringify(variables))}&features=${encodeURIComponent(JSON.stringify({"rweb_lists_timeline_redesign_enabled":false,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"creator_subscriptions_tweet_preview_api_enabled":true,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"tweetypie_unmention_optimization_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":false,"tweet_awards_web_tipping_enabled":false,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"responsive_web_media_download_video_enabled":false,"responsive_web_enhance_cards_enabled":false}))}`, {

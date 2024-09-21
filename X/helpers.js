@@ -80,33 +80,7 @@ async function callTwitterApi(method = 'GET', path, headers = {}, body) {
     return res;
 };
 
-async function callYeahApi(path, body = {}) {
-    let token = await getYeahToken();
-    if(token) body.key = token;
 
-    const res = await fetch(API_URL + path, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-    let result = await res.text();
-
-    if(result === 'Invalid key') {
-        chrome.storage.local.remove('yeahToken');
-        chrome.storage.local.get('yeahTokens', async result => {
-            if(result.yeahTokens) {
-                let userId = await getUserId();
-                delete result.yeahTokens[userId];
-                chrome.storage.local.set(result);
-            }
-        });
-        throw new Error('Invalid key');
-    }
-
-    return result;
-}
 
 let _userId;
 async function getUserId() {
@@ -129,7 +103,7 @@ function getYeahToken() {
                 }
             } else {
                 resolve(null);
-            } 
+            }
         });
     });
 }
@@ -141,7 +115,7 @@ function getYeahSettings() {
                 resolve(result.settings);
             } else {
                 resolve({});
-            } 
+            }
         });
     });
 }
