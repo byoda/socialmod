@@ -16,7 +16,7 @@
   "content_scripts": [
     {
       "matches": ["https://x.com/*", "https://twitter.com/*"],
-      "js": ["X/block.js", "X/helpers.js"]
+      "js": ["dist/socialmod.js"]
     }
   ]
 }
