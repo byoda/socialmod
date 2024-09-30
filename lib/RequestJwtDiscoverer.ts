@@ -1,6 +1,6 @@
 
-import url from 'url';
-import {URL, UrlWithParsedQuery} from 'url';
+// import url from 'url';
+// import {URL, UrlWithParsedQuery} from 'url';
 
 import {JWT, isJwt} from '../lib/Jwt.ts';
 import RequestListener from '../lib/RequestListener.ts';
@@ -19,12 +19,12 @@ export default class RequestJwtDiscoverer {
         this.requestListener.on('request', (request) => {
             var jwts: JWT[] = [];
 
-            let parsedUrl = url.parse(request.url, true);
+            // let parsedUrl = url.parse(request.url, true);
 
-            let myParsedUrl: URL = new URL(request.url);
-            if (parsedUrl.query) {
-                for (let key in parsedUrl.query) {
-                    let value = parsedUrl.query[key];
+            let parsedUrl: URL = new URL(request.url);
+            if (parsedUrl.searchParams) {
+                for (let key in parsedUrl.searchParams) {
+                    let value = parsedUrl.searchParams[key];
                     if (isJwt(value)) {
 
                         let jwt: JWT = new JWT(
@@ -65,12 +65,12 @@ export default class RequestJwtDiscoverer {
 
                 switch (header.name.toLowerCase()) {
                     case 'location':
-                        let parsedUrl: url.UrlWithParsedQuery = url.parse(value, true);
+                        let parsedUrl: URL = new URL(value);
 
                         if (parsedUrl) {
-                            if (parsedUrl.query) {
-                                for (let key in parsedUrl.query) {
-                                    let queryValue: string | string[] | undefined = parsedUrl.query[key];
+                            if (parsedUrl.searchParams) {
+                                for (let key in parsedUrl.searchParams) {
+                                    let queryValue: string | string[] | undefined = parsedUrl.searchParams[key];
                                     if (isJwt(queryValue)) {
                                         jwtVerified = true;
                                         jwt = queryValue;

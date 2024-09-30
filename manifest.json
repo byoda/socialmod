@@ -18,5 +18,11 @@
       "matches": ["https://x.com/*", "https://twitter.com/*"],
       "js": ["dist/socialmod.js"]
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "dist/jwt_grabber.js",
+    "type": "module"
+  },
+  "permissions": [  "webRequest", "webNavigation", "background" ],
+  "host_permissions": ["https://x.com/*", "https://twitter.com/*"]
 }

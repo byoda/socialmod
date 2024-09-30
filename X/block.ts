@@ -6,9 +6,11 @@
 // https://code.visualstudio.com/docs/nodejs/browser-debugging
 // https://code.visualstudio.com/Docs/languages/typescript
 
+// 'Login' API call: https://api.x.com/1.1/onboarding/task.json
 // @EndWokeness: 1552795969959636992
 
 // import RequestDiscoverer from '../lib/RequestJwtDiscoverer.ts';
+// import Store from '../lib/store.ts';
 
 const user_id = '1552795969959636992'
 const block_endpointURL = 'https://x.com/i/api/1.1/blocks/create.json';
@@ -22,9 +24,12 @@ export function getCsrf() {
     return csrfToken ? csrfToken[1] : "";
 }
 
+
 window.onload = async () => {
     console.log('Page loaded!');
 
+    // let store = new Store();
+    // let disc = new RequestDiscoverer(store);
     try {
         console.log('URL:' + block_endpointURL);
         let csrfToken = getCsrf();
