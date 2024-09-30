@@ -9,10 +9,12 @@
 // 'Login' API call: https://api.x.com/1.1/onboarding/task.json
 // @EndWokeness: 1552795969959636992
 
+import {iMessage, iSocialNetworkAuth} from '../core/datatypes.ts';
+import { get_keyname } from '../core/util.ts';
 
-const user_id = '1552795969959636992'
-const block_endpointURL = 'https://x.com/i/api/1.1/blocks/create.json';
-const unblock_endpointURL = 'https://api.x.com/1.1/blocks/destroy.json';
+const user_id: string = '1552795969959636992'
+const block_endpointURL: string = 'https://x.com/i/api/1.1/blocks/create.json';
+const unblock_endpointURL: string = 'https://api.x.com/1.1/blocks/destroy.json';
 
 const publicToken = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
 
@@ -25,9 +27,7 @@ export function getCsrf() {
 
 window.onload = async () => {
     console.log('Page loaded!');
-
-    // let store = new Store();
-    // let disc = new RequestDiscoverer(store);
+    return;
     try {
         console.log('URL:' + block_endpointURL);
         let csrfToken = getCsrf();
@@ -64,10 +64,25 @@ window.onload = async () => {
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-        console.log(sender.tab ?
-            "from a content script:" + sender.tab.url :
-            "from the extension"
-        );
-        console.log('Request' + request)
+        try {
+            let message = JSON.parse(request) as iMessage<iSocialNetworkAuth>;
+
+            console.log(
+                `Received message from ${message.source} type ${message.type}`
+            );
+            if (message.type === 'auth_tokens') {
+                let data: iSocialNetworkAuth = message.data;
+                if (data.name != 'Twitter') {
+                    console.log(`We do not yet support social network: ${data.name}`);
+                    return;
+                }
+                console.log(`Received auth_tokens: JWT: ${data.jwt}, CSRF Token: ${data.csrf_token}`);
+                localStorage.setItem('socialmod_twitter_auth_tokens', request);
+            }
+        } catch (e) {
+            console.log(
+                `Invalid message: ${request}`
+            );
+        }
     }
 );

@@ -1,12 +1,11 @@
-export interface iMessage {
+export interface iMessage<Type> {
     source: string;
     type: string;
-    data: SocialNetwork;
+    data: Type;
 }
 
-export interface iSocialNetwork {
+export interface iSocialNetworkAuth {
     name: string;
-    url: string;
     jwt: string | null;
     csrf_token: string | null;
 }
