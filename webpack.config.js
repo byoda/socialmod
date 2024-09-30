@@ -4,8 +4,8 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 module.exports = {
     // Multiple entry points: https://github.com/webpack/docs/wiki/configuration#outputfilename
     entry: {
-        socialmod: './X/block.ts',
-        jwt_grabber: './jwt/jwt_grabber.ts'
+        socialmod: './src/X/block.ts',
+        jwt_grabber: './src/jwt/jwt_grabber.ts'
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
