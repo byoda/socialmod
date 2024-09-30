@@ -1,25 +1,10 @@
 console.log('Adding listener');
 
+import {iMessage, iSocialNetwork, SocialNetwork, socialNetworks} from '../core/datatypes.ts';
 
-interface Dictionary<T> {
-    [key: string]: T
+function grab_auth_tokens() {
+    return
 }
-
-class Message {
-    source: string;
-    type: string;
-    data: SocialNetwork;
-
-    constructor(source: string, type: string, data: SocialNetwork) {
-        this.source = source;
-        this.type = type;
-        this.data = data;
-    }
-}
-
-
-
-function grab_auth_tokens()
 
 chrome.webRequest.onSendHeaders.addListener(
     function(details: chrome.webRequest.WebRequestHeadersDetails) {
@@ -63,7 +48,11 @@ chrome.webRequest.onSendHeaders.addListener(
                 if (tab == null) {
                     console.log('No active tab found!');
                 } else {
-                    let message: Message = new Message('jwt_grabber', 'auth_tokens', network);
+                    let message: iMessage = {
+                        source: 'jwt_grabber',
+                        type: 'auth_tokens',
+                        data: network
+                    };
                     console.log('Sending JWT and CSRF token to content script for tb.id: ' + tab.id);
                     await chrome.tabs.sendMessage(tab.id, JSON.stringify(message));
                 }
@@ -71,11 +60,8 @@ chrome.webRequest.onSendHeaders.addListener(
                 console.log('Error querying active tab: ' + error);
                 return
             }
-
         })();
     },
-    {
-        urls: ["<all_urls>"]
-    },
+    {urls: ["<all_urls>"]},
     ['requestHeaders']
 );
