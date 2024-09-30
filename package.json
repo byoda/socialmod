@@ -1,5 +1,6 @@
 {
     "dependencies": {
+        "@types/chrome": "^0.0.273",
         "chrome-types": "^0.1.301",
         "fork-ts-checker-webpack-plugin": "^9.0.2",
         "ts-loader": "^9.5.1",

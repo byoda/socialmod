@@ -9,6 +9,7 @@
             "es2019",
             "dom"
         ],
+        "types": ["chrome"],
         "removeComments": true,
         "noUnusedLocals": false,
         "composite": true,
