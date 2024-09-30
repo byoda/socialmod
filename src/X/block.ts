@@ -9,8 +9,6 @@
 // 'Login' API call: https://api.x.com/1.1/onboarding/task.json
 // @EndWokeness: 1552795969959636992
 
-// import RequestDiscoverer from '../lib/RequestJwtDiscoverer.ts';
-// import Store from '../lib/store.ts';
 
 const user_id = '1552795969959636992'
 const block_endpointURL = 'https://x.com/i/api/1.1/blocks/create.json';
