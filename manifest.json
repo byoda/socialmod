@@ -23,6 +23,6 @@
     "service_worker": "dist/jwt_grabber.js",
     "type": "module"
   },
-  "permissions": [  "webRequest", "webNavigation", "background" ],
+  "permissions": ["webRequest", "webNavigation", "background"],
   "host_permissions": ["https://x.com/*", "https://twitter.com/*"]
 }

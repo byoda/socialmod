@@ -1,61 +1,98 @@
 console.log('Adding listener');
 
 
+interface Dictionary<T> {
+    [key: string]: T
+}
+
+class Message {
+    source: string;
+    type: string;
+    data: SocialNetwork;
+
+    constructor(source: string, type: string, data: SocialNetwork) {
+        this.source = source;
+        this.type = type;
+        this.data = data;
+    }
+}
 
 class SocialNetwork {
     name: string;
     url: string;
     jwt: string | null;
-    csrf: string | null;
+    csrf_token: string | null;
 
-    constructor(name: string, url: string, jwt: string | null = null, csrf: string | null = null) {
+    constructor(name: string, url: string, jwt: string | null = null,
+                csrf_token: string | null = null) {
         this.name = name;
         this.url = url;
         this.jwt = jwt;
-        this.csrf = csrf;
+        this.csrf_token = csrf_token;
     }
 }
 
-let socialNetworks: Map<string, SocialNetwork> = new Map()
-socialNetworks.set('x.com', new SocialNetwork('Twitter', 'x.com'));
-socialNetworks.set('youtube.com', new SocialNetwork('YouTube', 'youtube.com'));
-socialNetworks.set('facebook.com', new SocialNetwork('Facebook', 'facebook.com'));
-socialNetworks.set('instagram.com', new SocialNetwork('Instagram', 'instagram.com'));
+let socialNetworks: Dictionary<SocialNetwork> = {
+    'x.com': new SocialNetwork('Twitter', 'x.com'),
+    'youtube.com': new SocialNetwork('YouTube', 'youtube.com'),
+    'facebook.com': new SocialNetwork('Facebook', 'facebook.com'),
+    'instagram.com': new SocialNetwork('Instagram', 'instagram.com')
+}
+
+function grab_auth_tokens()
 
 chrome.webRequest.onSendHeaders.addListener(
     function(details: chrome.webRequest.WebRequestHeadersDetails) {
-        console.log('Event triggered!');
-
         let url: URL = new URL(details.url)
         let fqdn: string = url.hostname.toLowerCase();
-        if (fqdn.includes('x.com') || fqdn.includes('twitter.com')) {
-            console.log('Twitter: ' + fqdn);
-        } else if (fqdn.includes('youtube.com')) {
-            console.log('YouTube: ' + fqdn);
-        }
 
         let fqdn_parts: string[] = fqdn.split('.');
-        let tls: string = fqdn_parts[fqdn_parts.length - 1]
-        let domain: string = fqdn_parts[fqdn_parts.length - 2]
-        let social_domain: string = domain + '.' + tls
-        if (!(social_domain in socialNetworks)) {
+        if (fqdn_parts.length < 2) {
+            console.log('Unsupported URL: ' + url.href);
             return
         }
+        let tld: string = fqdn_parts[fqdn_parts.length - 1]
+        let domain: string = fqdn_parts[fqdn_parts.length - 2]
+
+        let social_domain: string = `${domain}.${tld}`;
+        if (!(social_domain in socialNetworks)) {
+            console.log('Unsupported social network: ' + fqdn);
+            return
+        }
+        let network: SocialNetwork = socialNetworks[social_domain];
 
         let headers: chrome.webRequest.HttpHeader[] = details.requestHeaders;
         for (let i = 0, l = headers.length; i < l; ++i) {
             if (headers[i].name === 'authorization') {
-                console.log('JWT Token: ' + headers[i].value);
-                socialNetworks.get(social_domain)?.jwt = headers[i].value;
+                network.jwt = headers[i].value;
             }
             else if (headers[i].name === 'x-csrf-token') {
-                console.log('CSRF Token: ' + headers[i].value);
+                network.csrf_token = headers[i].value;
             }
-            // console.log('Header: ' + headers[i].name + ' --> ' + headers[i].value);
-
-            // Send JWT Token to background.js
-                // chrome.runtime.sendMessage({jwt: headers[i].value});
         }
+        console.log(`JWT: ${network.jwt}, CSRF Token: ${network.csrf_token}`);
+        if (network.jwt == null || network.csrf_token == null) {
+            console.log('JWT or CSRF token not found!');
+            return
+        }
+        (async () => {
+            try {
+                const [tab] = await chrome.tabs.query(
+                    {active: true, lastFocusedWindow: true}
+                );
+                if (tab == null) {
+                    console.log('No active tab found!');
+                } else {
+                    let message: Message = new Message('jwt_grabber', 'auth_tokens', network);
+                    console.log('Sending JWT and CSRF token to content script for tb.id: ' + tab.id);
+                    await chrome.tabs.sendMessage(tab.id, JSON.stringify(message));
+                }
+            } catch (error) {
+                console.log('Error querying active tab: ' + error);
+                return
+            }
+
+        })();
     },
     {
         urls: ["<all_urls>"]
