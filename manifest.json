@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Social Mod Extension",
+  "name": "Bring Your Own Content Moderation",
   "description": "Control the moderation of your feed; blocks posts/videos from influencers you do not want to see on Twitter, YouTube, and other social media platforms.",
   "version": "0.1",
   "action": {

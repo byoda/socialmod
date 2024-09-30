@@ -1,7 +1,7 @@
 console.log('Adding listener');
 
 import {iMessage, iSocialNetworkAuth} from '../core/datatypes.ts';
-import {SocialNetwork, socialNetworks} from '../core/datatypes.ts';
+import {socialNetworks} from '../core/datatypes.ts';
 
 class AuthToken {
     type: string;
@@ -38,27 +38,32 @@ function grab_auth_tokens(details: chrome.webRequest.WebRequestHeadersDetails) {
         return
     }
 
-    let network: SocialNetwork = socialNetworks[social_domain];
+    let network_auth: iSocialNetworkAuth = {
+        name: socialNetworks[social_domain].name,
+        jwt: null,
+        csrf_token: null
+    };
 
     let headers: chrome.webRequest.HttpHeader[] = details.requestHeaders;
     for (let i = 0, l = headers.length; i < l; ++i) {
         if (headers[i].name === 'authorization') {
-            network.jwt = headers[i].value;
+            network_auth.jwt = headers[i].value;
         }
         else if (headers[i].name === 'x-csrf-token') {
-            network.csrf_token = headers[i].value;
+            network_auth.csrf_token = headers[i].value;
         }
     }
-    // console.log(`JWT: ${network.jwt}, CSRF Token: ${network.csrf_token}`);
-    if (network.jwt == null || network.csrf_token == null) {
-        console.log('JWT or CSRF token not found!');
+    if (network_auth.jwt == null || network_auth.csrf_token == null) {
+        console.log(
+            `JWT ${network_auth.jwt} or CSRF token ${network_auth.csrf_token} not found!`
+        );
         return
     }
 
     let now: number = Math.round(Date.now() / 1000);
     now = 100000000000; // Force to always send the tokens, for testing
 
-    if (network.name == 'Twitter') {
+    if (network_auth.name == 'Twitter') {
         if (twitter_jwt != null && twitter_csrf_token != null
                 && twitter_csrf_token.expiration > now
                 && twitter_jwt.expiration > now) {
@@ -66,7 +71,7 @@ function grab_auth_tokens(details: chrome.webRequest.WebRequestHeadersDetails) {
             return;
         }
     } else {
-        console.log(`We do not yet support social network: ${network.name}`);
+        console.log(`We do not yet support social network: ${network_auth.name}`);
         return;
 
     }
@@ -79,13 +84,13 @@ function grab_auth_tokens(details: chrome.webRequest.WebRequestHeadersDetails) {
                 console.log('No active tab found!');
             } else {
                 let expires: number = now + TokenExpiration;
-                let temp_twitter_jwt = new AuthToken('jwt', network.jwt, expires);
-                let temp_twitter_csrf_token = new AuthToken('csrf', network.csrf_token, expires);
+                let temp_twitter_jwt = new AuthToken('jwt', network_auth.jwt, expires);
+                let temp_twitter_csrf_token = new AuthToken('csrf', network_auth.csrf_token, expires);
 
                 let message: iMessage<iSocialNetworkAuth> = {
                     source: 'jwt_grabber',
                     type: 'auth_tokens',
-                    data: network
+                    data: network_auth
                 };
                 console.log('Sending JWT and CSRF token to content script for tb.id: ' + tab.id);
                 await chrome.tabs.sendMessage(tab.id, JSON.stringify(message));
