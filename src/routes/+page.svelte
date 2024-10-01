@@ -1,5 +1,6 @@
-<script>
-    import {get_keyname} from '$lib/utils.ts';
+<script lang='ts'>
+    // import {get_keyname} from '../lib/util.ts';
+    // let a: string = get_keyname('blah');
     // urls = localStorage.getItem();
 </script>
 <h1>Welcome to BYOMod</h1>
