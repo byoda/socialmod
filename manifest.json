@@ -4,7 +4,7 @@
   "description": "Control the moderation of your feed; blocks posts/videos from influencers you do not want to see on Twitter, YouTube, and other social media platforms.",
   "version": "0.1",
   "action": {
-    "default_popup": "byomod.html",
+    "default_popup": "dist/byomod.html",
     "default_icon": "assets/favicon-32x32.png"
   },
   "icons": {

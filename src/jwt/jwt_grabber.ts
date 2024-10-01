@@ -1,7 +1,7 @@
 console.log('Adding listener');
 
-import {iMessage, iSocialNetworkAuth} from '../core/datatypes.ts';
-import {socialNetworks} from '../core/datatypes.ts';
+import {iMessage, iSocialNetworkAuth} from '../lib/datatypes.ts';
+import {socialNetworks} from '../lib/datatypes.ts';
 
 class AuthToken {
     type: string;

@@ -1,10 +1,17 @@
 {
+    "extends": "./.svelte-kit/tsconfig.json",
     "compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
         "sourceMap": true,
-        "strict": false,
+        "strict": true,
         "target": "es5",
         "module": "es2015",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "lib": [
             "es2019",
             "dom"
@@ -13,7 +20,7 @@
         "removeComments": true,
         "noUnusedLocals": false,
         "composite": true,
-        "emitDeclarationOnly": true,
+        // "emitDeclarationOnly": true,
         "allowImportingTsExtensions": true,
     }
 }

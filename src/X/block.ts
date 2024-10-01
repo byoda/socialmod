@@ -9,8 +9,8 @@
 // 'Login' API call: https://api.x.com/1.1/onboarding/task.json
 // @EndWokeness: 1552795969959636992
 
-import {iMessage, iSocialNetworkAuth} from '../core/datatypes.ts';
-import { get_keyname } from '../core/util.ts';
+import {iMessage, iSocialNetworkAuth} from '../lib/datatypes.ts';
+import { get_keyname } from '../lib/util.ts';
 
 const user_id: string = '1552795969959636992'
 const block_endpointURL: string = 'https://x.com/i/api/1.1/blocks/create.json';
