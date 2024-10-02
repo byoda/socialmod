@@ -1,6 +1,4 @@
 
-console.log('hello');
-console.log('hello');
 import type {iMessage} from '../lib/datatypes';
 import type {iSocialNetworkAuth} from '../lib/datatypes';
 

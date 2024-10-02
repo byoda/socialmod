@@ -4,6 +4,7 @@
         "target": "esnext",
         "module": "esnext",
         "strict": true,
+        "rootDir": "src",
         "moduleResolution": "node",
         "sourceMap": true,
         "esModuleInterop": true,
@@ -20,8 +21,9 @@
 
     },
     "include": [
-        "src/jwt/*.ts"
+        "src/**/*.ts"
     ],
+
     "exclude": [
         "node_modules/*",
         "src/**/*.svelte",
