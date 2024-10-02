@@ -10,13 +10,10 @@
 // @EndWokeness: 1552795969959636992
 
 import type {iMessage, iSocialNetworkAuth} from '../lib/datatypes';
-import { get_keyname } from '../lib/util';
 
 const user_id: string = '1552795969959636992'
 const block_endpointURL: string = 'https://x.com/i/api/1.1/blocks/create.json';
 const unblock_endpointURL: string = 'https://api.x.com/1.1/blocks/destroy.json';
-
-const publicToken = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
 
 export function getCsrf() {
     console.log("Getting CSRF!")
