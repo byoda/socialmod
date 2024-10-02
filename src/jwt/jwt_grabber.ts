@@ -1,14 +1,14 @@
 console.log('Adding listener');
 
-import {iMessage, iSocialNetworkAuth} from '../lib/datatypes.ts';
-import {socialNetworks} from '../lib/datatypes.ts';
+import {iMessage, iSocialNetworkAuth} from '../lib/datatypes';
+import {socialNetworks} from '../lib/datatypes';
 
 class AuthToken {
     type: string;
     value: string;
-    expiration: number | null;
+    expiration: number | undefined;
 
-    constructor(type: string, value: string, expiration: number | null = null) {
+    constructor(type: string, value: string, expiration: number | undefined = undefined) {
         this.type = type;
         this.value = value;
         this.expiration = expiration;
@@ -17,8 +17,8 @@ class AuthToken {
 
 const TokenExpiration: number = 60 * 60 * 24;
 
-let twitter_jwt: AuthToken | null = null;
-let twitter_csrf_token: AuthToken | null = null;
+let twitter_jwt: AuthToken | undefined = undefined;
+let twitter_csrf_token: AuthToken | undefined = undefined;
 
 function grab_auth_tokens(details: chrome.webRequest.WebRequestHeadersDetails) {
     let url: URL = new URL(details.url)
@@ -40,11 +40,16 @@ function grab_auth_tokens(details: chrome.webRequest.WebRequestHeadersDetails) {
 
     let network_auth: iSocialNetworkAuth = {
         name: socialNetworks[social_domain].name,
-        jwt: null,
-        csrf_token: null
+        jwt: undefined,
+        csrf_token: undefined
     };
 
-    let headers: chrome.webRequest.HttpHeader[] = details.requestHeaders;
+    let headers: chrome.webRequest.HttpHeader[] | undefined = details.requestHeaders;
+    if (headers == undefined) {
+        console.log('No headers found!');
+        return;
+    }
+
     for (let i = 0, l = headers.length; i < l; ++i) {
         if (headers[i].name === 'authorization') {
             network_auth.jwt = headers[i].value;
@@ -53,7 +58,7 @@ function grab_auth_tokens(details: chrome.webRequest.WebRequestHeadersDetails) {
             network_auth.csrf_token = headers[i].value;
         }
     }
-    if (network_auth.jwt == null || network_auth.csrf_token == null) {
+    if (network_auth.jwt == undefined || network_auth.csrf_token == undefined) {
         console.log(
             `JWT ${network_auth.jwt} or CSRF token ${network_auth.csrf_token} not found!`
         );
@@ -64,9 +69,9 @@ function grab_auth_tokens(details: chrome.webRequest.WebRequestHeadersDetails) {
     now = 100000000000; // Force to always send the tokens, for testing
 
     if (network_auth.name == 'Twitter') {
-        if (twitter_jwt != null && twitter_csrf_token != null
-                && twitter_csrf_token.expiration > now
-                && twitter_jwt.expiration > now) {
+        if (twitter_jwt != undefined && twitter_csrf_token != undefined
+                && twitter_csrf_token.expiration! > now
+                && twitter_jwt.expiration! > now) {
             console.log('JWT and CSRF token already found for Twitter and they have not yet expired!');
             return;
         }
@@ -80,27 +85,30 @@ function grab_auth_tokens(details: chrome.webRequest.WebRequestHeadersDetails) {
             const [tab] = await chrome.tabs.query(
                 {active: true, lastFocusedWindow: true}
             );
-            if (tab == null) {
+            if (tab == undefined) {
                 console.log('No active tab found!');
             } else {
                 let expires: number = now + TokenExpiration;
-                let temp_twitter_jwt = new AuthToken('jwt', network_auth.jwt, expires);
-                let temp_twitter_csrf_token = new AuthToken('csrf', network_auth.csrf_token, expires);
+                let temp_twitter_jwt = new AuthToken('jwt', network_auth.jwt!, expires);
+                let temp_twitter_csrf_token = new AuthToken('csrf', network_auth.csrf_token!, expires);
 
                 let message: iMessage<iSocialNetworkAuth> = {
                     source: 'jwt_grabber',
                     type: 'auth_tokens',
                     data: network_auth
                 };
+                if (tab == undefined) {
+                    return;
+                }
                 console.log('Sending JWT and CSRF token to content script for tb.id: ' + tab.id);
-                await chrome.tabs.sendMessage(tab.id, JSON.stringify(message));
+                await chrome.tabs.sendMessage(tab.id!, JSON.stringify(message));
                 twitter_jwt = temp_twitter_jwt;
                 twitter_csrf_token = temp_twitter_csrf_token
             }
         } catch (error) {
             console.log(`Error querying active tab: ${error}`);
-            twitter_jwt = null;
-            twitter_csrf_token = null;
+            twitter_jwt = undefined;
+            twitter_csrf_token = undefined;
         }
     })();
 }

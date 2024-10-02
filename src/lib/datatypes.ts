@@ -6,18 +6,18 @@ export interface iMessage<Type> {
 
 export interface iSocialNetworkAuth {
     name: string;
-    jwt: string | null;
-    csrf_token: string | null;
+    jwt: string | undefined;
+    csrf_token: string | undefined;
 }
 
 export class SocialNetwork {
     name: string;
     url: string;
-    jwt: string | null;
-    csrf_token: string | null;
+    jwt: string | undefined;
+    csrf_token: string | undefined;
 
-    constructor(name: string, url: string, jwt: string | null = null,
-                csrf_token: string | null = null) {
+    constructor(name: string, url: string, jwt: string | undefined = undefined,
+                csrf_token: string | undefined = undefined) {
         this.name = name;
         this.url = url;
         this.jwt = jwt;

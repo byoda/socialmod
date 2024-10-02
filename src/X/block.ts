@@ -9,8 +9,8 @@
 // 'Login' API call: https://api.x.com/1.1/onboarding/task.json
 // @EndWokeness: 1552795969959636992
 
-import {iMessage, iSocialNetworkAuth} from '../lib/datatypes.ts';
-import { get_keyname } from '../lib/util.ts';
+import type {iMessage, iSocialNetworkAuth} from '../lib/datatypes';
+import { get_keyname } from '../lib/util';
 
 const user_id: string = '1552795969959636992'
 const block_endpointURL: string = 'https://x.com/i/api/1.1/blocks/create.json';
@@ -63,7 +63,7 @@ window.onload = async () => {
 }
 
 chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
+    function(request: string, sender: object, sendResponse: Function) {
         try {
             let message = JSON.parse(request) as iMessage<iSocialNetworkAuth>;
 
