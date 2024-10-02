@@ -24,14 +24,22 @@ export function getCsrf() {
 
 window.onload = async () => {
     console.log('Page loaded!');
-    return;
     try {
         console.log('URL:' + block_endpointURL);
-        let csrfToken = getCsrf();
+        let csrfToken: string = getCsrf();
+        let data_text: string | null = localStorage.getItem(
+            'socialmod_twitter_auth_tokens'
+        );
+        if (data_text == null) {
+            console.log('No auth tokens found!');
+            return;
+        }
+        let data = JSON.parse(data_text) as iSocialNetworkAuth;
+        let publicToken: string | undefined = data.csrf_token
         const response = await fetch(
             block_endpointURL,
             {
-                method: 'POST',
+                method: 'POST', publicToken,
                 headers: {
                     'authorization': publicToken,
                     'X-Csrf-Token': csrfToken,
@@ -70,11 +78,17 @@ chrome.runtime.onMessage.addListener(
             if (message.type === 'auth_tokens') {
                 let data: iSocialNetworkAuth = message.data;
                 if (data.name != 'Twitter') {
-                    console.log(`We do not yet support social network: ${data.name}`);
+                    console.log(
+                        `We do not yet support social network: ${data.name}`
+                    );
                     return;
                 }
-                console.log(`Received auth_tokens: JWT: ${data.jwt}, CSRF Token: ${data.csrf_token}`);
-                localStorage.setItem('socialmod_twitter_auth_tokens', request);
+                console.log(
+                    `Received auth_tokens: JWT: ${data.jwt}, CSRF Token: ${data.csrf_token}`
+                );
+                localStorage.setItem(
+                    'socialmod_twitter_auth_tokens', JSON.stringify(data)
+                );
             }
         } catch (e) {
             console.log(

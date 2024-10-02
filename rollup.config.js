@@ -93,4 +93,32 @@ function buildConfig(inputFileName, outputFileName) {
 
 export default [
     buildConfig("popup", "popup"),
+    buildConfig("X/block", "socialmod"),
+    buildConfig("jwt/jwt_grabber", "jwt_grabber"),
+    {
+        input: "src/jwt/jwt_grabber.ts",
+        output: {
+            format: buildEnv === 'firefox' ? 'iife' : 'es',
+            name: "service_worker",
+            file: "public/build/jwt_grabber.js",
+            sourcemap: !production,
+        },
+        plugins: [
+            typescript(
+                {
+                    tsconfig: "./tsconfig.worker.json",
+                    sourceMap: !production,
+                }
+            ),
+            commonjs(),
+            resolve(
+              {
+                  browser: true,
+                  preferBuiltins: false }
+            ),
+        ],
+        watch: {
+            clearScreen: false,
+        },
+    },
 ];

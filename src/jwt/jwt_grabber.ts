@@ -1,6 +1,6 @@
 console.log('Adding listener');
 
-import {iMessage, iSocialNetworkAuth} from '../lib/datatypes';
+import type {iMessage, iSocialNetworkAuth} from '../lib/datatypes';
 import {socialNetworks} from '../lib/datatypes';
 
 class AuthToken {
