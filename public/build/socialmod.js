@@ -2,27 +2,22 @@
 // https://www.mediamister.com/find-twitter-user-id
 const user_id = '1552795969959636992';
 const block_endpointURL = 'https://x.com/i/api/1.1/blocks/create.json';
-function getCsrf() {
-    console.log("Getting CSRF!");
-    let csrfToken = document.cookie.match(/(?:^|;\s*)ct0=([0-9a-f]+)\s*(?:;|$)/);
-    return csrfToken ? csrfToken[1] : "";
-}
 window.onload = async () => {
     console.log('Page loaded!');
     try {
         console.log('URL:' + block_endpointURL);
-        let csrfToken = getCsrf();
         let data_text = localStorage.getItem('socialmod_twitter_auth_tokens');
         if (data_text == null) {
             console.log('No auth tokens found!');
             return;
         }
         let data = JSON.parse(data_text);
-        let publicToken = data.csrf_token;
+        let csrfToken = data.csrf_token;
+        let authToken = data.jwt;
         const response = await fetch(block_endpointURL, {
             method: 'POST',
             headers: {
-                'authorization': publicToken,
+                'authorization': authToken,
                 'X-Csrf-Token': csrfToken,
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'X-Twitter-Active-User': 'yes',
@@ -66,6 +61,4 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         console.log(`Invalid message: ${request}`);
     }
 });
-
-export { getCsrf };
 //# sourceMappingURL=socialmod.js.map

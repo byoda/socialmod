@@ -14,18 +14,11 @@ const user_id: string = '1552795969959636992';
 const block_endpointURL: string = 'https://x.com/i/api/1.1/blocks/create.json';
 const unblock_endpointURL: string = 'https://api.x.com/1.1/blocks/destroy.json';
 
-export function getCsrf() {
-    console.log("Getting CSRF!")
-    let csrfToken = document.cookie.match(/(?:^|;\s*)ct0=([0-9a-f]+)\s*(?:;|$)/);
-    return csrfToken ? csrfToken[1] : "";
-}
-
 
 window.onload = async () => {
     console.log('Page loaded!');
     try {
         console.log('URL:' + block_endpointURL);
-        let csrfToken: string = getCsrf();
         let data_text: string | null = localStorage.getItem(
             'socialmod_twitter_auth_tokens'
         );
@@ -34,13 +27,14 @@ window.onload = async () => {
             return;
         }
         let data = JSON.parse(data_text) as iSocialNetworkAuth;
-        let publicToken: string | undefined = data.csrf_token
+        let csrfToken: string | undefined = data.csrf_token
+        let authToken: string | undefined = data.jwt
         const response = await fetch(
             block_endpointURL,
             {
                 method: 'POST',
                 headers: {
-                    'authorization': publicToken!,
+                    'authorization': authToken!,
                     'X-Csrf-Token': csrfToken!,
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Twitter-Active-User': 'yes',

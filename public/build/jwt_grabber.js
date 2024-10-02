@@ -65,7 +65,7 @@ function grab_auth_tokens(details) {
         }
     }
     if (network_auth.jwt == undefined || network_auth.csrf_token == undefined) {
-        console.log(`JWT ${network_auth.jwt} or CSRF token ${network_auth.csrf_token} not found!`);
+        console.log(`Unauthenticated API call to ${url.href}`);
         return;
     }
     let now = Math.round(Date.now() / 1000);
