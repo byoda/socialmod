@@ -121,4 +121,30 @@ export default [
             clearScreen: false,
         },
     },
+    {
+      input: "src/X/block.ts",
+      output: {
+          format: buildEnv === 'firefox' ? 'iife' : 'es',
+          name: "socialmod",
+          file: "public/build/socialmod.js",
+          sourcemap: !production,
+      },
+      plugins: [
+          typescript(
+              {
+                  tsconfig: "./tsconfig.worker.json",
+                  sourceMap: !production,
+              }
+          ),
+          commonjs(),
+          resolve(
+            {
+                browser: true,
+                preferBuiltins: false }
+          ),
+      ],
+      watch: {
+          clearScreen: false,
+      },
+  }
 ];

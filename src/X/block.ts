@@ -1,4 +1,3 @@
-
 // # Twitter handle to user-id convertor:
 // https://www.mediamister.com/find-twitter-user-id
 
@@ -9,9 +8,9 @@
 // 'Login' API call: https://api.x.com/1.1/onboarding/task.json
 // @EndWokeness: 1552795969959636992
 
-import type {iMessage, iSocialNetworkAuth} from '../lib/datatypes';
+import type {iMessage, iSocialNetworkAuth } from '../lib/datatypes';
 
-const user_id: string = '1552795969959636992'
+const user_id: string = '1552795969959636992';
 const block_endpointURL: string = 'https://x.com/i/api/1.1/blocks/create.json';
 const unblock_endpointURL: string = 'https://api.x.com/1.1/blocks/destroy.json';
 
@@ -39,10 +38,10 @@ window.onload = async () => {
         const response = await fetch(
             block_endpointURL,
             {
-                method: 'POST', publicToken,
+                method: 'POST',
                 headers: {
-                    'authorization': publicToken,
-                    'X-Csrf-Token': csrfToken,
+                    'authorization': publicToken!,
+                    'X-Csrf-Token': csrfToken!,
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Twitter-Active-User': 'yes',
                     'X-Twitter-Client-Language': 'en',
