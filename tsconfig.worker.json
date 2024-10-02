@@ -15,7 +15,7 @@
                 "src/*"
             ]
         },
-        "allowJs": true,
+        "allowJs": false,
         "isolatedModules": true,
 
     },

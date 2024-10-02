@@ -11,7 +11,7 @@
   },
 
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "config.html"
   },
 
   "content_scripts": [

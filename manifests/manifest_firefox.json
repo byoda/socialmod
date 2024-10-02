@@ -12,7 +12,7 @@
 
     "browser_action": {
       "default_icon": "icons/favicon-48x48.png",
-      "default_popup": "popup.html",
+      "default_popup": "config.html",
       "default_title": "example"
     },
 

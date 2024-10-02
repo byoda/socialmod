@@ -1,14 +1,8 @@
-// # Twitter handle to user-id convertor:
-// https://www.mediamister.com/find-twitter-user-id
 
-// Instructions for setting up Visual Code for Browser Extension Development:
-// https://code.visualstudio.com/docs/nodejs/browser-debugging
-// https://code.visualstudio.com/Docs/languages/typescript
-
-// 'Login' API call: https://api.x.com/1.1/onboarding/task.json
-// @EndWokeness: 1552795969959636992
-
-import type {iMessage, iSocialNetworkAuth } from '../lib/datatypes';
+console.log('hello');
+console.log('hello');
+import type {iMessage} from '../lib/datatypes';
+import type {iSocialNetworkAuth} from '../lib/datatypes';
 
 const user_id: string = '1552795969959636992';
 const block_endpointURL: string = 'https://x.com/i/api/1.1/blocks/create.json';

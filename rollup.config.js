@@ -27,7 +27,7 @@ function serve() {
             } else {
                 let command;
                 if (os.platform() === "linux") {
-                    command = "chrome --remote-debugging-port=9222  --reload-extension=public/build";
+                    command = "google-chrome --remote-debugging-port=9222  --reload-extension=public/build";
                 } else {
                     command = "C:/Program\ Files/Google\\Chrome/Application/chrome.exe --remote-debugging-port=9222 --reload-extension=public/build";
                 }
@@ -92,9 +92,7 @@ function buildConfig(inputFileName, outputFileName) {
 }
 
 export default [
-    buildConfig("popup", "popup"),
-    buildConfig("X/block", "socialmod"),
-    buildConfig("jwt/jwt_grabber", "jwt_grabber"),
+    buildConfig("config", "config"),
     {
         input: "src/jwt/jwt_grabber.ts",
         output: {
