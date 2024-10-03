@@ -87,12 +87,12 @@ export default class ByoList {
         let response = await fetch(this.url.href);
         if (response.status === 200) {
             let text: string = await response.json();
-            let data = yaml.load(text) as iByoList;
+            this.list = yaml.load(text) as iByoList;
         };
-
     }
 
-    from_file(filename: string): iByoList {
+    // Used for test purposes
+    from_file(filename: string) {
         let text: string = fs.readFileSync(filename, 'utf8');
         let data: iByoList = yaml.load(text) as iByoList ;
         return data;

@@ -33,7 +33,7 @@ interface Dictionary<T> {
     [key: string]: T
 };
 
-export let socialNetworks: Dictionary<SocialNetwork> = {
+export const socialNetworks: Dictionary<SocialNetwork> = {
     'x.com': new SocialNetwork('Twitter', 'x.com'),
     'youtube.com': new SocialNetwork('YouTube', 'youtube.com'),
     'facebook.com': new SocialNetwork('Facebook', 'facebook.com'),
