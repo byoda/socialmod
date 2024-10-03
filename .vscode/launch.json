@@ -6,6 +6,17 @@
             "request": "attach",
             "name": "Attach to Chrome",
             "port": 9222,
+        },
+        {
+            "name": "Run npm test",
+            "request": "launch",
+            "type": "node",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "test"
+            ],
+            "args": [],
+            "env": {}
         }
     ]
 }

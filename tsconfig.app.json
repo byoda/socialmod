@@ -1,4 +1,5 @@
 {
     "extends": "@tsconfig/svelte/tsconfig.json",
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true
 }

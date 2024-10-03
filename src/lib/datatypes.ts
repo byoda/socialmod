@@ -23,6 +23,10 @@ export class SocialNetwork {
         this.jwt = jwt;
         this.csrf_token = csrf_token;
     }
+
+    get_keyname(key: string): string {
+        return `socialmod_${this.name}_${key}`
+    }
 };
 
 interface Dictionary<T> {
