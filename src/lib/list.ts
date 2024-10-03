@@ -71,16 +71,16 @@ export default class ByoList {
         this.url = url;
     }
 
-    async load(): Promise<iByoList[]> {
+    async load(): Promise<iByoList> {
         let key: string = this.net.get_keyname(`'list_${this.url.href}`);
-        let data: iByoList[] = this.storage.get(key) as iByoList[];
+        let data: iByoList = await this.storage.get(key) as iByoList;
 
         return data;
     }
 
-    async save(data: iByoList[]) {
+    async save(data: iByoList) {
         let key: string = this.net.get_keyname(`'list_${this.url.href}`);
-        this.storage.set(key, data);
+        await this.storage.set(key, data);
     }
 
     async download() {

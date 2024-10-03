@@ -5,7 +5,7 @@ export default class ByoStorage {
         this.storage = window.localStorage;
     }
 
-    get(key: string): object | undefined {
+    async get(key: string): Promise<object | undefined> {
         let text: string | null = this.storage.getItem(key);
         if (text == undefined) {
             return undefined;
@@ -14,7 +14,7 @@ export default class ByoStorage {
         return data
     }
 
-    set(key: string, value: object) {
+    async set(key: string, value: object) {
         this.storage.setItem(key, JSON.stringify(value));
     }
 }
