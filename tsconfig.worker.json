@@ -18,10 +18,12 @@
         },
         "allowJs": false,
         "isolatedModules": true,
+        "types": ["chrome", "node"],
 
     },
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "test/**/*.ts",
     ],
 
     "exclude": [

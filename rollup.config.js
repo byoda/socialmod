@@ -92,7 +92,7 @@ function buildConfig(inputFileName, outputFileName) {
 }
 
 export default [
-    buildConfig("config", "config"),
+    buildConfig("popup", "popup"),
     {
         input: "src/jwt/jwt_grabber.ts",
         output: {

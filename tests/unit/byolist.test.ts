@@ -5,7 +5,7 @@
 import { describe, test, expect } from '@jest/globals';
 
 import ByoList from './../../src/lib/list';
-import { iByoList } from './../../src/lib/list';
+import iByoList from './../../src/lib/list';
 // import { socialNetworks } from '../../src/lib/datatypes';
 import { SocialNetwork } from '../../src/lib/datatypes';
 

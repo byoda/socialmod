@@ -1,4 +1,4 @@
-import App from "./lib/config.svelte";
+import App from "./lib/popup.svelte";
 import "./tailwind.css";
 
 const app = new App(
