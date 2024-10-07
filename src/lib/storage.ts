@@ -14,12 +14,13 @@ export default class ByoStorage {
         return data
     }
 
-    get_list_sync(key: string): string[] {
+    get_set_sync(key: string): Set<string> {
         let text: string | null = this.storage.getItem(key);
         if (text == undefined) {
-            return [];
+            let new_set: Set<string> = new Set<string>();
+            return new_set;
         }
-        let data: [] = JSON.parse(text) || [] as [];
+        let data: Set<string> = JSON.parse(text) as Set<string>;
         return data
     }
 

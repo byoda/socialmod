@@ -16,7 +16,8 @@
 
     let list_url: string = '';
     // let subscribed_lists: string[] = [];
-    let subscribed_lists: string[] = byo_storage.get_list_sync(key) || [];
+    let subscribed_lists = new Set<string>();
+     subscribed_lists = byo_storage.get_set_sync(key);
 
     let mod_list: string;
     for (mod_list in subscribed_lists) {
