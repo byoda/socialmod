@@ -71,11 +71,11 @@ export default class ByoList {
         this.url = url;
     }
 
-    async load(): Promise<iByoList> {
+    async load(): Promise<number> {
         let key: string = this.net.get_keyname(`'list_${this.url.href}`);
         let data: iByoList = await this.storage.get(key) as iByoList;
-
-        return data;
+        this.list = data;
+        return this.list!.block_list!.length;
     }
 
     async save(data: iByoList) {
@@ -92,9 +92,10 @@ export default class ByoList {
     }
 
     // Used for test purposes
-    from_file(filename: string) {
+    from_file(filename: string): number {
         let text: string = fs.readFileSync(filename, 'utf8');
         let data: iByoList = yaml.load(text) as iByoList ;
-        return data;
+        this.list = data;
+        return this.list.block_list.length;
     }
 }

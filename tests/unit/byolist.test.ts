@@ -5,21 +5,12 @@
 import { describe, test, expect } from '@jest/globals';
 
 import ByoList from './../../src/lib/list';
-import iByoList from './../../src/lib/list';
-// import { socialNetworks } from '../../src/lib/datatypes';
-import { SocialNetwork } from '../../src/lib/datatypes';
+import { socialNetworks } from '../../src/lib/constants';
 
 const TestList: string = 'https://byomod.org/lists/dathes.yaml';
 const TestFile: string = 'tests/collateral/content-moderation.yaml';
 interface Dictionary<T> {
     [key: string]: T
-};
-
-const socialNetworks: Dictionary<SocialNetwork> = {
-    'x.com': new SocialNetwork('Twitter', 'x.com'),
-    'youtube.com': new SocialNetwork('YouTube', 'youtube.com'),
-    'facebook.com': new SocialNetwork('Facebook', 'facebook.com'),
-    'instagram.com': new SocialNetwork('Instagram', 'instagram.com')
 };
 
 describe(
@@ -38,8 +29,9 @@ describe(
                     socialNetworks['x.com'], TestList
                 );
                 expect(byo_list).toBeInstanceOf(ByoList);
-                let data: iByoList = byo_list.from_file(TestFile);
-                expect(data.block_list).toHaveLength(992);
+                let entries: number = byo_list.from_file(TestFile);
+                expect(entries).toBe(992);
+                expect(byo_list.list!.block_list).toHaveLength(992);
             }
         );
         // jsdom does not support fetch. This
@@ -48,7 +40,7 @@ describe(
         // test(
         //     'should download ByoList from the network', async () => {
         //         const byo_list = new ByoList(
-        //             socialNetworks['Twitter'], TestList
+        //             socialNetworks['x.com'], TestList
         //         );
         //         expect(byo_list).toBeInstanceOf(ByoList);
         //         await byo_list.download();
@@ -62,9 +54,10 @@ describe(
                     socialNetworks['x.com'], TestList
                 );
                 expect(byo_list).toBeInstanceOf(ByoList);
-                let data: iByoList = byo_list.from_file(TestFile);
-                expect(data.block_list).toHaveLength(992);
-                await byo_list.save(data);
+                let entries: number = byo_list.from_file(TestFile);
+                expect(entries).toBe(992);
+                expect(byo_list.list!.block_list).toHaveLength(992);
+                await byo_list.save(byo_list.list!);
             }
         );
         test(
@@ -74,17 +67,18 @@ describe(
                     socialNetworks['x.com'], TestList
                 );
                 expect(byo_list).toBeInstanceOf(ByoList);
-                let data: iByoList = byo_list.from_file(TestFile);
-                expect(data.block_list).toHaveLength(992);
-                await byo_list.save(data);
+                let entries: number = byo_list.from_file(TestFile);
+                expect(entries).toBe(992);
+                expect(byo_list.list!.block_list).toHaveLength(992);
+                await byo_list.save(byo_list.list!);
 
                 const new_list = new ByoList(
                     socialNetworks['x.com'], TestList
                 )
-                let new_data: iByoList = await new_list.load();
-                expect(new_data.block_list).toHaveLength(992);
+                let count: number = await new_list.load();
+                expect(count).toBe(992);
+                expect(new_list!.list!.block_list).toHaveLength(992);
             }
         );
-
     }
 );

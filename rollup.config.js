@@ -10,6 +10,7 @@ import tailwindcss from "tailwindcss";
 import os from "os";
 import fs from "fs";
 
+// import { sveltePreprocess } from 'svelte-preprocess'
 
 // const production = !process.env.ROLLUP_WATCH;
 // const buildEnv = process.env.BUILD_ENV;
@@ -58,6 +59,9 @@ function buildConfig(inputFileName, outputFileName) {
                     compilerOptions: {
                       dev: !production,
                     },
+                    // sveltePreprocess fails to build .svelte files so we
+                    // use the deprecated preprocess instead
+                    // preprocess: sveltePreprocess(
                     preprocess: preprocess(
                         {
                             typescript: {
@@ -123,8 +127,8 @@ export default [
       input: "src/X/block.ts",
       output: {
           format: buildEnv === 'firefox' ? 'iife' : 'es',
-          name: "socialmod",
-          file: "public/build/socialmod.js",
+          name: "block_x",
+          file: "public/build/block_x.js",
           sourcemap: !production,
       },
       plugins: [
