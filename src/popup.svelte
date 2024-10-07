@@ -65,4 +65,19 @@
             </tr>
         {/each}
     </table>
+    <form on:submit|preventDefault={add_list} method="POST">
+        <label>List URL
+            <input
+                name='list_url'
+                type='url'
+                class='border-2 border-gray-300 p-2'
+                placeholder='Enter a list name'
+                bind:value={list_url}
+            >
+        </label>
+    <button
+          class='bg-blue-600 px-[6px] py-[14px] mt-6 text-white font-semibold'
+        type='submit' formaction="?/add_list">Add list</button
+        >
+    </form>
 </main>
