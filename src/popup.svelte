@@ -15,12 +15,12 @@
     let key: string = net.get_keyname('my_lists');
 
     let list_url: string = '';
-    let subscribed_lists: string[] = [];
-    // let subscribed_lists: [] = byo_storage.get_list_sync(key);
+    // let subscribed_lists: string[] = [];
+    let subscribed_lists: string[] = byo_storage.get_list_sync(key) || [];
 
     let mod_list: string;
-    // for (mod_list in subscribed_lists) {
-    //     console.log('mod_list: ', mod_list);
+    for (mod_list in subscribed_lists) {
+        console.log('mod_list: ', mod_list);
     //     let byo_list: ByoList = new ByoList(net, mod_list);
     //     try {
     //         byo_list.load();
@@ -28,20 +28,21 @@
     //         console.info('BYO List not in storage: ', mod_list);
     //         continue;
     //     }
-    //     // let mod_list_key: string = net.get_keyname(mod_list);
-
-    //     // mod_list_data = byo_storage.get_sync(mod_list_key);
-    // }
+    }
     const add_list = () => {
         console.log('add_list: ', list_url);
-        // if (! list_url) return;
+        if (! list_url) return;
 
-        // try {
-        //     new URL(list_url);
-        // } catch (e) {
-        //     console.error('Invalid URL: ', list_url);
-        //     return;
-        // }
+        if (list_url in subscribed_lists) {
+            console.info('List already subscribed: ', list_url);
+            return;
+        }
+        try {
+            new URL(list_url);
+        } catch (e) {
+            console.error('Invalid URL: ', list_url);
+            return;
+        };
         // Svelte trickery for updating lists:
         // https://learn.svelte.dev/tutorial/updating-arrays-and-objects
         subscribed_lists.push(list_url);
@@ -65,19 +66,20 @@
             </tr>
         {/each}
     </table>
+    <br/>
     <form on:submit|preventDefault={add_list} method="POST">
-        <label>List URL
+        <label>BYOMod list URL
             <input
                 name='list_url'
                 type='url'
                 class='border-2 border-gray-300 p-2'
-                placeholder='Enter a list name'
+                placeholder='Enter a URL for a BYOMod list'
                 bind:value={list_url}
             >
         </label>
     <button
           class='bg-blue-600 px-[6px] py-[14px] mt-6 text-white font-semibold'
-        type='submit' formaction="?/add_list">Add list</button
+        type='submit' formaction="?/add_list">Add</button
         >
     </form>
 </main>

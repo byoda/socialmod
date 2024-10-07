@@ -14,7 +14,7 @@ export default class ByoStorage {
         return data
     }
 
-    get_list_sync(key: string): [] {
+    get_list_sync(key: string): string[] {
         let text: string | null = this.storage.getItem(key);
         if (text == undefined) {
             return [];
