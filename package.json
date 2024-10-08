@@ -41,6 +41,7 @@
         "prettier": "^3.3.3",
         "prettier-plugin-svelte": "^3.2.7",
         "rollup": "^4.23.0",
+        "rollup-plugin-polyfill-node": "^0.13.0",
         "rollup-plugin-postcss": "^4.0.2",
         "rollup-plugin-svelte": "^7.2.2",
         "svelte": "^4.2.19",
@@ -53,6 +54,8 @@
         "webextension-polyfill": "^0.12.0"
     },
     "dependencies": {
-        "js-yaml": "^4.1.0"
+        "debug": "^4.3.7",
+        "js-yaml": "^4.1.0",
+        "promisify": "^0.0.3"
     }
 }

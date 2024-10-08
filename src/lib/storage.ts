@@ -1,3 +1,5 @@
+import type { iListOfLists } from "./datatypes";
+
 export default class ByoStorage {
     storage: Storage;
 
@@ -20,7 +22,11 @@ export default class ByoStorage {
             let new_set: Set<string> = new Set<string>();
             return new_set;
         }
-        let data: Set<string> = JSON.parse(text) as Set<string>;
+        console.log(text);
+        let data: Set<string> = JSON.parse(text);
+        if (typeof data === 'object') {
+            data = new Set(data);
+        }
         return data
     }
 
@@ -39,5 +45,30 @@ export default class ByoStorage {
 
     async set(key: string, value: object) {
         this.storage.setItem(key, JSON.stringify(value));
+    }
+
+    get_list_of_lists_sync(key_prefix: string): iListOfLists {
+        let key: string = `${key_prefix}_LoL`;
+        const parsed = this.get_sync(key);
+        if (this.isListOfLists(parsed)) {
+            let data: iListOfLists = parsed as iListOfLists;
+            return data
+        };
+
+        return { lists: new Set<string>() };
+    }
+
+    set_list_of_lists_sync(key_prefix: string, value: iListOfLists) {
+        let key: string = `${key_prefix}_LoL`;
+        this.set_sync(key, value);
+    }
+
+    isListOfLists(obj: any): obj is iListOfLists {
+        console.log('Got data:', obj);
+        if (obj === undefined) {
+            console.error('obj is undefined');
+            return false;
+        }
+        return obj.lists !== undefined;
     }
 }

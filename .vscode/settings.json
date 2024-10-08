@@ -5,4 +5,7 @@
             "<node_internals>/**"
         ]
     },
+    "[svelte]": {
+        "editor.defaultFormatter": "svelte.svelte-vscode"
+    },
 }

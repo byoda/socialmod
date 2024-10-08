@@ -25,7 +25,7 @@ export class SocialNetwork {
     }
 
     get_keyname(key: string): string {
-        return `socialmod_${this.name}_${key}`
+        return `byomod_${this.name}_${key}`
     }
 };
 
@@ -34,3 +34,6 @@ export interface Dictionary<T> {
     [key: string]: T
 };
 
+export interface iListOfLists {
+    lists: Set<string>;
+}

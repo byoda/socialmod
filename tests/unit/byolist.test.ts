@@ -2,6 +2,8 @@
  * @jest-environment jsdom
  */
 
+const https = require('https');
+
 import { describe, test, expect } from '@jest/globals';
 
 import ByoList from './../../src/lib/list';

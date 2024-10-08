@@ -5,7 +5,8 @@
     import browser from 'webextension-polyfill';
     import {SocialNetwork} from './lib/datatypes';
     import {socialNetworks} from './lib/constants';
-    // import ByoList from './lib/list';
+    import type {iListOfLists} from './lib/datatypes';
+    import ByoList from './lib/list';
     import ByoStorage from './lib/storage';
 
     const TestList: string = 'https://byomod.org/lists/dathes.yaml';
@@ -15,30 +16,43 @@
     let key: string = net.get_keyname('my_lists');
 
     let list_url: string = '';
-    // let subscribed_lists: string[] = [];
-    let subscribed_lists = new Set<string>();
-     subscribed_lists = byo_storage.get_set_sync(key);
+    let listOfLists: iListOfLists  = byo_storage.get_list_of_lists_sync(key);
+    console.log('Subscribed lists: ', listOfLists.lists);
+    if (! listOfLists) {
+        listOfLists = { lists: new Set<string>() };
+        byo_storage.set_list_of_lists_sync(key, listOfLists);
+    }
+    if (! listOfLists.lists) {
+        listOfLists.lists = new Set<string>();
+    }
 
     let mod_list: string;
-    for (mod_list in subscribed_lists) {
-        console.log('mod_list: ', mod_list);
-    //     let byo_list: ByoList = new ByoList(net, mod_list);
-    //     try {
-    //         byo_list.load();
-    //     } catch (e) {
-    //         console.info('BYO List not in storage: ', mod_list);
-    //         continue;
-    //     }
+    for (mod_list in listOfLists.lists) {
+        console.log('found in storage: ', mod_list);
+        try {
+            let byo_list: ByoList = new ByoList(null, mod_list);
+            try {
+                byo_list.load();
+            } catch (e) {
+                console.error('Could not load from storage: ', mod_list);
+                continue;
+            }
+        } catch (e) {
+            console.error('Invalid URL: ', mod_list);
+            continue;
+        }
     }
+
     const add_list = () => {
         console.log('add_list: ', list_url);
         if (! list_url) return;
 
-        if (list_url in subscribed_lists) {
+        if (list_url in listOfLists) {
             console.info('List already subscribed: ', list_url);
             return;
         }
         try {
+            console.log('Adding list: ', list_url);
             new URL(list_url);
         } catch (e) {
             console.error('Invalid URL: ', list_url);
@@ -46,9 +60,9 @@
         };
         // Svelte trickery for updating lists:
         // https://learn.svelte.dev/tutorial/updating-arrays-and-objects
-        subscribed_lists.push(list_url);
-        subscribed_lists = subscribed_lists;
-        // byo_storage.set_sync(key, subscribed_lists);
+        listOfLists.lists.add(list_url);
+        listOfLists = listOfLists;
+        byo_storage.set_list_of_lists_sync(key, listOfLists);
         list_url = '';
 
     };
@@ -59,13 +73,16 @@
 </script>
 
 <main class='flex flex-col justify-center items-center'>
-    <p>Subscribed lists: {subscribed_lists.length}</p>
+    <p>Top level {JSON.stringify(listOfLists)}</p>
+    <p>Lists: {JSON.stringify(listOfLists.lists)}</p>
+    <p>Subscribed lists: {listOfLists.lists.size}</p>
+    {@debug}
     <table>
-        {#each subscribed_lists as list}
+        <!-- {#each listOfLists.lists as list}
             <tr>
                 <td>{list}</td>
             </tr>
-        {/each}
+        {/each} -->
     </table>
     <br/>
     <form on:submit|preventDefault={add_list} method="POST">

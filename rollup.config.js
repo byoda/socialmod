@@ -10,6 +10,8 @@ import tailwindcss from "tailwindcss";
 import os from "os";
 import fs from "fs";
 
+import nodePolyfills from 'rollup-plugin-polyfill-node';
+
 // import { sveltePreprocess } from 'svelte-preprocess'
 
 // const production = !process.env.ROLLUP_WATCH;
@@ -88,6 +90,9 @@ function buildConfig(inputFileName, outputFileName) {
             resolve({ browser: true }),
             commonjs(),
             serve(),
+            // nodePolyfills is needed to prevent failure transpiling
+            // ByoList.from_file()
+            nodePolyfills(),
         ],
         watch: {
             clearScreen: false,

@@ -2,8 +2,6 @@
 
 import * as fs from 'fs';
 
-// import { parse } from 'yaml'
-// import YAML from 'yaml'
 import * as yaml from 'js-yaml';
 
 import ByoStorage from './storage';
@@ -58,33 +56,45 @@ export interface iByoList {
 
 export default class ByoList {
     storage: ByoStorage;
-    url: URL
+    url: URL | undefined;
     list: iByoList | undefined;
-    net: SocialNetwork
+    net: SocialNetwork | undefined
 
-    constructor(net: SocialNetwork, url: string | URL) {
+    constructor(net: SocialNetwork | undefined, url: string | URL) {
         this.net = net;
         this.storage = new ByoStorage();
+        this.url = undefined;
+
         if (typeof url === 'string') {
             url = new URL(url);
         }
-        this.url = url;
+        this.url = url as URL;
     }
 
+    get_keyname(key: string): string {
+        if (this.net) {
+            return this.net.get_keyname(key);
+        } else {
+            return `byomod_${key}`;
+        }
+    }
+
+
+
     async load(): Promise<number> {
-        let key: string = this.net.get_keyname(`'list_${this.url.href}`);
+        let key: string = this.get_keyname(`list_${this.url!.href}`);
         let data: iByoList = await this.storage.get(key) as iByoList;
         this.list = data;
         return this.list!.block_list!.length;
     }
 
     async save(data: iByoList) {
-        let key: string = this.net.get_keyname(`'list_${this.url.href}`);
+        let key: string = this.get_keyname(`list_${this.url!.href}`);
         await this.storage.set(key, data);
     }
 
     async download() {
-        let response = await fetch(this.url.href);
+        let response = await fetch(this.url!.href);
         if (response.status === 200) {
             let text: string = await response.json();
             this.list = yaml.load(text) as iByoList;
