@@ -9,8 +9,7 @@
     import ByoList from './lib/list';
     import type {iByoList} from './lib/list';
     import ByoStorage from './lib/storage';
-    import load_all_lists from './lib/util';
-
+    
     const byo_storage: ByoStorage = new ByoStorage();
 
     let list_url: string = '';
@@ -19,8 +18,16 @@
 
     const load_lists = async() => {
         console.log('Loading lists');
-        let allLists: Promise<Map<string, ByoList>> = load_all_lists(listOfLists.lists);
+        let all_lists: Map<string, ByoList> = new Map<string, ByoList>();
+        for (let mod_list of listOfLists.lists) {
+            console.log('Reading URL: ', mod_list);
+            let byo_list: ByoList = new ByoList(mod_list);
+            await byo_list.initialize();
+            all_lists.set(mod_list, byo_list);
+        }
+        return all_lists;
     }
+
     const add_list = () => {
         console.log('add_list: ', list_url);
         if (! list_url) return;
@@ -62,10 +69,10 @@
             <th></th>
             <th></th>
         </tr>
-        {#each Array.from(listOfLists.lists) as list}
+        {#each lists.keys() as list_key}
             <tr>
-                <td>{list}</td>
-                <td>{allLists.get(list).black_list.length}</td>
+                <td>{lists.get(list_key).url.href}</td>
+                <td>{lists.get(list_key).list.block_list.length}</td>
             </tr>
         {/each}
     </table>
