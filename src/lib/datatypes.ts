@@ -35,5 +35,5 @@ export interface Dictionary<T> {
 };
 
 export interface iListOfLists {
-    lists: Set<string>;
+    lists: string[];
 }

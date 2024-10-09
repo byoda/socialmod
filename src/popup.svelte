@@ -7,42 +7,20 @@
     import {socialNetworks} from './lib/constants';
     import type {iListOfLists} from './lib/datatypes';
     import ByoList from './lib/list';
+    import type {iByoList} from './lib/list';
     import ByoStorage from './lib/storage';
+    import load_all_lists from './lib/util';
 
-    const TestList: string = 'https://byomod.org/lists/dathes.yaml';
     const byo_storage: ByoStorage = new ByoStorage();
 
-    let net: SocialNetwork = socialNetworks['x.com'];
-    let key: string = net.get_keyname('my_lists');
-
     let list_url: string = '';
-    let listOfLists: iListOfLists  = byo_storage.get_list_of_lists_sync(key);
+    let listOfLists: iListOfLists  = byo_storage.load_list_of_lists_sync();
     console.log('Subscribed lists: ', listOfLists.lists);
-    if (! listOfLists) {
-        listOfLists = { lists: new Set<string>() };
-        byo_storage.set_list_of_lists_sync(key, listOfLists);
-    }
-    if (! listOfLists.lists) {
-        listOfLists.lists = new Set<string>();
-    }
 
-    let mod_list: string;
-    for (mod_list in listOfLists.lists) {
-        console.log('found in storage: ', mod_list);
-        try {
-            let byo_list: ByoList = new ByoList(null, mod_list);
-            try {
-                byo_list.load();
-            } catch (e) {
-                console.error('Could not load from storage: ', mod_list);
-                continue;
-            }
-        } catch (e) {
-            console.error('Invalid URL: ', mod_list);
-            continue;
-        }
+    const load_lists = async() => {
+        console.log('Loading lists');
+        let allLists: Promise<Map<string, ByoList>> = load_all_lists(listOfLists.lists);
     }
-
     const add_list = () => {
         console.log('add_list: ', list_url);
         if (! list_url) return;
@@ -60,9 +38,9 @@
         };
         // Svelte trickery for updating lists:
         // https://learn.svelte.dev/tutorial/updating-arrays-and-objects
-        listOfLists.lists.add(list_url);
+        listOfLists.lists.push(list_url);
         listOfLists = listOfLists;
-        byo_storage.set_list_of_lists_sync(key, listOfLists);
+        byo_storage.save_list_of_lists_sync(listOfLists);
         list_url = '';
 
     };
@@ -73,16 +51,23 @@
 </script>
 
 <main class='flex flex-col justify-center items-center'>
-    <p>Top level {JSON.stringify(listOfLists)}</p>
-    <p>Lists: {JSON.stringify(listOfLists.lists)}</p>
-    <p>Subscribed lists: {listOfLists.lists.size}</p>
-    {@debug}
+{#await load_lists()}
+    <p>Loading lists...</p>
+{:then lists}
+    <p>Lists: {listOfLists.lists.length}</p>
     <table>
-        <!-- {#each listOfLists.lists as list}
+        <tr>
+            <th>Lists</th>
+            <th>Entries</th>
+            <th></th>
+            <th></th>
+        </tr>
+        {#each Array.from(listOfLists.lists) as list}
             <tr>
                 <td>{list}</td>
+                <td>{allLists.get(list).black_list.length}</td>
             </tr>
-        {/each} -->
+        {/each}
     </table>
     <br/>
     <form on:submit|preventDefault={add_list} method="POST">
@@ -100,4 +85,5 @@
         type='submit' formaction="?/add_list">Add</button
         >
     </form>
+{/await}
 </main>

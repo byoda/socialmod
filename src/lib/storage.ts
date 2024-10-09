@@ -16,20 +16,6 @@ export default class ByoStorage {
         return data
     }
 
-    get_set_sync(key: string): Set<string> {
-        let text: string | null = this.storage.getItem(key);
-        if (text == undefined) {
-            let new_set: Set<string> = new Set<string>();
-            return new_set;
-        }
-        console.log(text);
-        let data: Set<string> = JSON.parse(text);
-        if (typeof data === 'object') {
-            data = new Set(data);
-        }
-        return data
-    }
-
     set_sync(key: string, value: object) {
         this.storage.setItem(key, JSON.stringify(value));
     }
@@ -43,32 +29,32 @@ export default class ByoStorage {
         return data
     }
 
-    async set(key: string, value: object) {
-        this.storage.setItem(key, JSON.stringify(value));
-    }
-
-    get_list_of_lists_sync(key_prefix: string): iListOfLists {
-        let key: string = `${key_prefix}_LoL`;
+    load_list_of_lists_sync(): iListOfLists {
+        let key: string = `LoL`;
         const parsed = this.get_sync(key);
         if (this.isListOfLists(parsed)) {
             let data: iListOfLists = parsed as iListOfLists;
+            console.log('Lol lists', data.lists, 'type:', typeof data.lists);
             return data
         };
 
-        return { lists: new Set<string>() };
+        return { lists: [] };
     }
 
-    set_list_of_lists_sync(key_prefix: string, value: iListOfLists) {
-        let key: string = `${key_prefix}_LoL`;
+    save_list_of_lists_sync(value: iListOfLists) {
+        let key: string = `LoL`;
         this.set_sync(key, value);
     }
 
     isListOfLists(obj: any): obj is iListOfLists {
         console.log('Got data:', obj);
         if (obj === undefined) {
-            console.error('obj is undefined');
             return false;
         }
         return obj.lists !== undefined;
+    }
+
+    isList(obj: any): obj is Set<string> {
+        return obj instanceof Set;
     }
 }

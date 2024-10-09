@@ -51,17 +51,14 @@ export interface iByoList {
     meta: iByoListMeta;
     block_list: ModerationEntry[];
     trust_list: string[];
-    recommend_list: string[];
 }
 
 export default class ByoList {
     storage: ByoStorage;
     url: URL | undefined;
     list: iByoList | undefined;
-    net: SocialNetwork | undefined
 
-    constructor(net: SocialNetwork | undefined, url: string | URL) {
-        this.net = net;
+    constructor(url: string | URL) {
         this.storage = new ByoStorage();
         this.url = undefined;
 
@@ -71,33 +68,77 @@ export default class ByoList {
         this.url = url as URL;
     }
 
-    get_keyname(key: string): string {
-        if (this.net) {
-            return this.net.get_keyname(key);
-        } else {
-            return `byomod_${key}`;
+    async initialize() {
+        if (this.url === undefined) {
+            console.error('No URL set for ByoList');
+            return;
+        }
+        try {
+            await this.load();
+            if (this.list !== undefined
+                    && this.list.block_list !== undefined
+                    && this.list.block_list.length > 0) {
+                return
+            }
+        } catch (e) {
+            console.log(`Could not load from storage: ${this.url.href}`);
+        }
+        try {
+            await this.download();
+            await this.save();
+            return
+        } catch (e) {
+            console.error('Could not download: ', mod_list, e);
         }
     }
 
 
+    get_keyname(key: string): string {
+        return `byomod_${key}`;
+    }
 
     async load(): Promise<number> {
         let key: string = this.get_keyname(`list_${this.url!.href}`);
         let data: iByoList = await this.storage.get(key) as iByoList;
         this.list = data;
-        return this.list!.block_list!.length;
+        console.log('Loaded list:', key, 'with', this.list!.block_list.length, 'entries');
+        if (this.list === undefined || this.list.block_list === undefined) {
+            this.list = {
+                meta: {
+                    author_email: '',
+                    author_name: '',
+                    author_url: '',
+                    categories: []
+                },
+                block_list: [],
+                trust_list: []
+            };
+        }
+
+        return this.list.block_list.length;
     }
 
-    async save(data: iByoList) {
+    async save() {
         let key: string = this.get_keyname(`list_${this.url!.href}`);
-        await this.storage.set(key, data);
+        if (this.list === undefined) {
+            console.log('No data in the list to save');
+            return;
+        }
+        console.log(
+            'Saving list:', key, 'with'
+        );
+        this.storage.set_sync(key, this.list);
     }
 
     async download() {
-        let response = await fetch(this.url!.href);
+        let response: Response = await fetch(this.url!.href);
         if (response.status === 200) {
-            let text: string = await response.json();
+            let text: string = await response.text();
             this.list = yaml.load(text) as iByoList;
+            console.log(
+                'Downloaded list:', this.url!.href, 'with',
+                this.list!.block_list.length, 'entries'
+            );
         };
     }
 
